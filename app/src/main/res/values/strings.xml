@@ -1,0 +1,9 @@
+<resources>
+    <string name="app_name">Flipdigit-Android</string>
+    <string name="flipmeter">Flipmeter</string>
+    <string name="flipmeter_spinner">FlipmeterSpinner</string>
+    <string name="set">Set Digit</string>
+    <string name="set_random">Set Random Digit</string>
+    <string name="hint">######</string>
+    <string name="hint_single">##</string>
+</resources>

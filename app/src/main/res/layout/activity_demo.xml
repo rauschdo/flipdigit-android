@@ -28,6 +28,7 @@
             android:id="@+id/numberInput"
             android:layout_width="100dp"
             android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
             android:layout_margin="@dimen/half_padding"
             android:hint="@string/hint"
             android:imeOptions="actionDone"
@@ -85,13 +86,13 @@
             android:id="@+id/numberInputSpinner"
             android:layout_width="100dp"
             android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
             android:layout_margin="@dimen/half_padding"
             android:hint="@string/hint_single"
             android:imeOptions="actionDone"
             android:inputType="phone"
             android:maxLength="2"
             android:textAlignment="center" />
-
 
         <Button
             android:id="@+id/button_set_spinner"

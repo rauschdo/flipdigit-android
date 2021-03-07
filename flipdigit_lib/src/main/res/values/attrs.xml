@@ -1,7 +1,22 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <declare-styleable name="FlipmeterSpinner">
-        <attr name="animSpeed" format="integer"/>
-        <attr name="randomFlipping" format="boolean"/>
+    <attr name="flips" format="integer" />
+    <attr name="msPerFlip" format="integer" />
+    <attr name="randomFlipping" format="boolean" />
+    <attr name="numberStyle" format="enum" />
+
+    <declare-styleable name="Flipmeter">
+        <attr name="flips" />
+        <attr name="msPerFlip" />
+        <attr name="randomFlipping" />
+        <attr name="numberStyle" />
     </declare-styleable>
+
+    <declare-styleable name="FlipmeterSpinner">
+        <attr name="flips" />
+        <attr name="msPerFlip" />
+        <attr name="randomFlipping" />
+        <attr name="numberStyle" />
+    </declare-styleable>
+
 </resources>

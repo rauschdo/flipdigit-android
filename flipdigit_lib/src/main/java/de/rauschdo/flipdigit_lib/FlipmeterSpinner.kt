@@ -2,31 +2,31 @@ package de.rauschdo.flipdigit_lib
 
 import android.content.Context
 import android.util.AttributeSet
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.widget.RelativeLayout
 
 class FlipmeterSpinner : RelativeLayout {
 
-    private var mContext: Context? = null
-
     private var flipmeterSpinner: View? = null
-
-    //val currentDigit: Int = 0
 
     private var flipDigitRandom: FlipDigitRandom? = null
 
     private var flipDigitLinear: FlipDigitLinear? = null
 
-    private var animationSpeed = 250L
-
-    var randomNumbersEnabled: Boolean? = null
+    /*
+     * Customizables
+     */
+    private var animationSpeed: Long? = null
+    private var numberOfFlips: Int? = null
+    private var randomNumbersEnabled: Boolean? = null
+    private var numberStyle: NumberStyles = NumberStyles.DEFAULT
 
     /*
      * Simple constructor used when creating a view from code.
      */
     constructor(context: Context) : super(context) {
-        this.mContext = context
         initialize(context)
     }
 
@@ -35,7 +35,6 @@ class FlipmeterSpinner : RelativeLayout {
      * XML file.
      */
     constructor(context: Context, attrs: AttributeSet?) : super(context, attrs) {
-        this.mContext = context
         initialize(context, attrs)
     }
 
@@ -43,43 +42,88 @@ class FlipmeterSpinner : RelativeLayout {
      * Perform inflation from XML and apply a class-specific base style. This constructor of View allows subclasses to
      * use their own base style when they are inflating.
      */
-    constructor(context: Context, attrs: AttributeSet?, defStyle: Int) : super(context, attrs, defStyle) {
-        this.mContext = context
+    constructor(context: Context, attrs: AttributeSet?, defStyle: Int) : super(
+        context,
+        attrs,
+        defStyle
+    ) {
         initialize(context, attrs)
-    }
-
-    private fun inflateLayout() {
-        val layoutInflater = context?.getSystemService(Context.LAYOUT_INFLATER_SERVICE) as LayoutInflater
-        flipmeterSpinner = layoutInflater.inflate(R.layout.view_flipmeter_spinner, this)
-    }
-
-    fun setDigit(animateTo: Int, withAnimation: Boolean) {
-        if (randomNumbersEnabled == true) {
-            flipDigitRandom?.setDigit(animateTo, withAnimation)
-        } else {
-            flipDigitLinear?.setDigit(animateTo, withAnimation)
-        }
     }
 
     /*
      * Initialize all of our class members and variables
      */
     private fun initialize(context: Context, attrs: AttributeSet? = null) {
-        if (randomNumbersEnabled == null) {
-            if (attrs != null) {
-                context.obtainStyledAttributes(attrs, R.styleable.FlipmeterSpinner).apply {
-                    animationSpeed = getInt(R.styleable.FlipmeterSpinner_animSpeed, 250).toLong()
-                    randomNumbersEnabled = getBoolean(R.styleable.FlipmeterSpinner_randomFlipping, false)
-                    recycle()
-                }
+        if (attrs != null) {
+            context.obtainStyledAttributes(attrs, R.styleable.FlipmeterSpinner).apply {
+                animationSpeed = getInt(R.styleable.FlipmeterSpinner_msPerFlip, 250).toLong()
+                numberOfFlips = getInt(R.styleable.FlipmeterSpinner_flips, 5)
+                randomNumbersEnabled =
+                    getBoolean(R.styleable.FlipmeterSpinner_randomFlipping, false)
+                numberStyle = getEnum(R.styleable.Flipmeter_numberStyle, NumberStyles.DEFAULT)
+                recycle()
             }
         }
 
         inflateLayout()
-        if (randomNumbersEnabled == true) {
-            flipDigitRandom = flipmeterSpinner?.let { FlipDigitRandom(context, id, it, animationSpeed, null) }
+
+        flipDigitRandom =
+            flipmeterSpinner?.let {
+                FlipDigitRandom(
+                    context,
+                    id,
+                    it,
+                    animationSpeed ?: Defaults.msPerFlip,
+                    null
+                )
+            }
+
+        flipDigitLinear =
+            flipmeterSpinner?.let {
+                FlipDigitLinear(
+                    context,
+                    id,
+                    it,
+                    animationSpeed ?: Defaults.msPerFlip,
+                    null
+                )
+            }
+
+    }
+
+    private fun inflateLayout() {
+        val layoutInflater =
+            context?.getSystemService(Context.LAYOUT_INFLATER_SERVICE) as LayoutInflater
+        flipmeterSpinner = layoutInflater.inflate(R.layout.view_flipmeter_spinner, this)
+    }
+
+    fun setDigit(
+        animateTo: Int,
+        numberStyle: NumberStyles?,
+        flips: Int?,
+        msPerFlip: Long?,
+        randomFlipping: Boolean?,
+        withAnimation: Boolean
+    ) {
+        randomFlipping?.let {
+            randomNumbersEnabled = it
+        }
+
+        if (randomNumbersEnabled ?: Defaults.randomNumbersEnabled) {
+            flipDigitRandom?.setDigit(
+                animateTo,
+                numberStyle ?: numberStyle ?: Defaults.numberStyle,
+                flips ?: numberOfFlips ?: Defaults.numberOfFlips,
+                msPerFlip ?: animationSpeed ?: Defaults.msPerFlip,
+                withAnimation
+            )
         } else {
-            flipDigitLinear = flipmeterSpinner?.let { FlipDigitLinear(context, id, it, animationSpeed, null) }
+            flipDigitLinear?.setDigit(
+                animateTo,
+                numberStyle ?: numberStyle ?: Defaults.numberStyle,
+                msPerFlip ?: animationSpeed ?: Defaults.msPerFlip,
+                withAnimation
+            )
         }
     }
 }

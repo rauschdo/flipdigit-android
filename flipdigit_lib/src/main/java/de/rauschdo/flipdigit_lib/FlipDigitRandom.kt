@@ -12,7 +12,7 @@ internal class FlipDigitRandom(
     private val context: Context,
     private val id: Int,
     view: View,
-    private val animationSpeed: Long,
+    private var animationSpeed: Long,
     private val onAnimComplete: OnAnimationComplete?
 ) : AnimationListener {
 
@@ -26,25 +26,16 @@ internal class FlipDigitRandom(
     private var animation2: Animation? = null
 
     private var randomDigitsListIndex = 0
-    private var randomDigitsList: MutableList<Int>? = null
+    private var randomDigitsList = emptyList<Int>()
 
-    private val lastDigit: Int
-        get() {
-            var digit = 0
-            try {
-                digit = imageFrontUpper?.tag as Int
-            } catch (e: Exception) {
-                e.printStackTrace()
-            }
+    private lateinit var numberStyle: NumberStyles
 
-            if (digit > 9)
-                digit = 0
-
-            return digit
+    private val digitToShow: Int
+        get() = if (randomDigitsListIndex >= randomDigitsList.size) {
+            randomDigitsList[randomDigitsList.size - 1]
+        } else {
+            randomDigitsList[randomDigitsListIndex]
         }
-
-    private val digitToShow: Int?
-        get() = randomDigitsList?.get(randomDigitsListIndex + 1)
 
     init {
         imageBackUpper = view.findViewById(R.id.FlipMeterSpinner_image_back_upper)
@@ -55,35 +46,38 @@ internal class FlipDigitRandom(
         init()
     }
 
-    fun setDigit(digit: Int, withAnimation: Boolean) {
+    fun setDigit(
+        digit: Int,
+        style: NumberStyles,
+        flips: Int,
+        msPerFlip: Long,
+        withAnimation: Boolean
+    ) {
+        var flipsInternal = flips
+        if (flips < 0) {
+            flipsInternal = 2
+        }
+
+        numberStyle = style
+
         var mDigit = digit
         if (mDigit < 0)
             mDigit = 0
         if (mDigit > 9)
             mDigit = 9
 
-        val lastUpperDigit = lastDigit
+        randomDigitsList = mutableListOf()
 
-        randomDigitsList = ArrayList()
-        randomDigitsList?.add(0)
-        randomDigitsList?.add(1)
-        randomDigitsList?.add(2)
-        randomDigitsList?.add(3)
-        randomDigitsList?.add(4)
-        randomDigitsList?.add(5)
-        randomDigitsList?.add(6)
-        randomDigitsList?.add(7)
-        randomDigitsList?.add(8)
-        randomDigitsList?.add(9)
-        randomDigitsList?.removeAt(lastUpperDigit)
-        randomDigitsList?.shuffle()
-        randomDigitsList?.add(0, lastUpperDigit)
-        randomDigitsList?.add(mDigit)
+        for (i in 0 until flipsInternal) {
+            (randomDigitsList as? MutableList<Int>)?.add(Random().nextInt(10))
+        }
+        (randomDigitsList as? MutableList<Int>)?.shuffle()
+        (randomDigitsList as? MutableList<Int>)?.add(digit)
 
         randomDigitsListIndex = 0
 
         if (withAnimation)
-            startAnimation()
+            startAnimation(msPerFlip)
         else
             setDigitImageToAll(mDigit)
     }
@@ -102,23 +96,23 @@ internal class FlipDigitRandom(
         animation2?.setAnimationListener(this)
     }
 
-    private fun startAnimation() {
-
-        if (randomDigitsListIndex > 9) {
+    private fun startAnimation(animationDuration: Long) {
+        if (randomDigitsListIndex >= randomDigitsList.size) {
             onAnimComplete?.onComplete(id)
         } else {
-            startDigitAnimation(true)
-            startDigitAnimation(false)
+            startDigitAnimation(animationDuration, true)
+            startDigitAnimation(animationDuration, false)
         }
-
     }
 
-    private fun startDigitAnimation(isUpper: Boolean) {
+    private fun startDigitAnimation(animationDuration: Long, isUpper: Boolean) {
         if (isUpper) {
+            animation1?.duration = animationDuration
             imageFrontUpper?.clearAnimation()
             imageFrontUpper?.animation = animation1
             imageFrontUpper?.startAnimation(animation1)
         } else {
+            animation2?.duration = animationDuration
             imageFrontLower?.clearAnimation()
             imageFrontLower?.animation = animation2
             imageFrontLower?.startAnimation(animation2)
@@ -126,10 +120,10 @@ internal class FlipDigitRandom(
     }
 
     private fun incrementFromCode() {
-        when {
-            randomDigitsListIndex < 0 -> randomDigitsListIndex = 0
-            randomDigitsListIndex > randomDigitsList!!.size -> randomDigitsListIndex = randomDigitsList!!.size - 1
-            else -> randomDigitsListIndex++
+        if (randomDigitsListIndex < 0) {
+            randomDigitsListIndex = 0
+        } else {
+            randomDigitsListIndex++
         }
     }
 
@@ -142,59 +136,71 @@ internal class FlipDigitRandom(
 
     private fun setDigitImage(digitToShow: Int, isUpper: Boolean, image: ImageView) {
         image.tag = digitToShow
-        val resource: Int = when (digitToShow) {
-            0 -> if (isUpper)
-                R.drawable.digit_0_upper
-            else
-                R.drawable.digit_0_lower
-
-            1 -> if (isUpper)
-                R.drawable.digit_1_upper
-            else
-                R.drawable.digit_1_lower
-
-            2 -> if (isUpper)
-                R.drawable.digit_2_upper
-            else
-                R.drawable.digit_2_lower
-
-            3 -> if (isUpper)
-                R.drawable.digit_3_upper
-            else
-                R.drawable.digit_3_lower
-
-            4 -> if (isUpper)
-                R.drawable.digit_4_upper
-            else
-                R.drawable.digit_4_lower
-
-            5 -> if (isUpper)
-                R.drawable.digit_5_upper
-            else
-                R.drawable.digit_5_lower
-
-            6 -> if (isUpper)
-                R.drawable.digit_6_upper
-            else
-                R.drawable.digit_6_lower
-
-            7 -> if (isUpper)
-                R.drawable.digit_7_upper
-            else
-                R.drawable.digit_7_lower
-
-            8 -> if (isUpper)
-                R.drawable.digit_8_upper
-            else
-                R.drawable.digit_8_lower
-
-            9 -> if (isUpper)
-                R.drawable.digit_9_upper
-            else
-                R.drawable.digit_9_lower
-            else -> -1
-        }
+        val resource: Int =
+            try {
+                when (digitToShow) {
+                    0 -> if (isUpper)
+                        numberStyle.resourceList[0]
+                    else
+                        numberStyle.resourceList[1]
+                    1 -> if (isUpper)
+                        numberStyle.resourceList[2]
+                    else
+                        numberStyle.resourceList[3]
+                    2 -> if (isUpper)
+                        numberStyle.resourceList[4]
+                    else
+                        numberStyle.resourceList[5]
+                    3 -> if (isUpper)
+                        numberStyle.resourceList[6]
+                    else
+                        numberStyle.resourceList[7]
+                    4 -> if (isUpper)
+                        numberStyle.resourceList[8]
+                    else
+                        numberStyle.resourceList[9]
+                    5 -> if (isUpper)
+                        numberStyle.resourceList[10]
+                    else
+                        numberStyle.resourceList[11]
+                    6 -> if (isUpper)
+                        numberStyle.resourceList[12]
+                    else
+                        numberStyle.resourceList[13]
+                    7 -> if (isUpper)
+                        numberStyle.resourceList[14]
+                    else
+                        numberStyle.resourceList[15]
+                    8 -> if (isUpper)
+                        numberStyle.resourceList[16]
+                    else
+                        numberStyle.resourceList[17]
+                    9 -> if (isUpper)
+                        numberStyle.resourceList[18]
+                    else
+                        numberStyle.resourceList[19]
+                    else -> R.drawable.resource_missing
+                }
+            } catch (exception: IndexOutOfBoundsException) {
+                exception.printStackTrace()
+                R.drawable.resource_missing
+            } catch (exception: MissingResourceException) {
+                exception.printStackTrace()
+                R.drawable.resource_missing
+            }
         image.setImageResource(resource)
+    }
+
+    override fun onAnimationStart(animation: Animation) {
+        if (animation === animation1) {
+            imageFrontLower?.visibility = View.INVISIBLE
+
+            setDigitImage(digitToShow, false, imageFrontLower!!)
+            setDigitImage(digitToShow, true, imageBackUpper!!)
+
+        } else if (animation === animation2) {
+            imageFrontLower?.visibility = View.VISIBLE
+        }
     }
 
     override fun onAnimationEnd(animation: Animation) {
@@ -202,29 +208,16 @@ internal class FlipDigitRandom(
             imageFrontUpper?.visibility = View.INVISIBLE
         } else if (animation === animation2) {
 
-            setDigitImage(digitToShow!!, true, imageFrontUpper!!)
-            setDigitImage(digitToShow!!, false, imageBackLower!!)
+            setDigitImage(digitToShow, true, imageFrontUpper!!)
+            setDigitImage(digitToShow, false, imageBackLower!!)
             imageFrontUpper?.visibility = View.VISIBLE
             incrementFromCode()
-            startAnimation()
-
+            startAnimation(animationSpeed)
         }
     }
 
-    override fun onAnimationRepeat(arg0: Animation) {
+    override fun onAnimationRepeat(animation: Animation) {
         //nothing
-    }
-
-    override fun onAnimationStart(animation: Animation) {
-        if (animation === animation1) {
-            imageFrontLower?.visibility = View.INVISIBLE
-
-            setDigitImage(digitToShow!!, false, imageFrontLower!!)
-            setDigitImage(digitToShow!!, true, imageBackUpper!!)
-
-        } else if (animation === animation2) {
-            imageFrontLower?.visibility = View.VISIBLE
-        }
     }
 
     interface OnAnimationComplete {

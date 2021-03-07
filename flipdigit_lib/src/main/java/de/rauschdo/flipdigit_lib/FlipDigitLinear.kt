@@ -5,12 +5,13 @@ import android.view.View
 import android.view.animation.Animation
 import android.view.animation.AnimationUtils
 import android.widget.ImageView
+import java.util.*
 
 internal class FlipDigitLinear(
     private val context: Context,
     private val id: Int,
     view: View,
-    private val animationSpeed: Long,
+    private var animationSpeed: Long,
     private val onAnimComplete: OnAnimationComplete?
 ) : Animation.AnimationListener {
 
@@ -32,6 +33,8 @@ internal class FlipDigitLinear(
         else
             animateFrom + 1
 
+    private lateinit var numberStyle: NumberStyles
+
     init {
         imageBackUpper = view.findViewById(R.id.FlipMeterSpinner_image_back_upper)
         imageBackLower = view.findViewById(R.id.FlipMeterSpinner_image_back_lower)
@@ -41,26 +44,27 @@ internal class FlipDigitLinear(
         init()
     }
 
-    fun setDigit(digit: Int, withAnimation: Boolean) {
+    fun setDigit(digit: Int, style: NumberStyles, msPerFlip: Long, withAnimation: Boolean) {
+        numberStyle = style
+        animationSpeed = msPerFlip
+
         var mDigit = digit
         if (mDigit < 0)
             mDigit = 0
         if (mDigit > 9)
             mDigit = 9
 
-
         animateTo = mDigit
 
         if (withAnimation)
-            animateDigit()
+            animateDigit(msPerFlip)
         else
             setDigitImageToAll(mDigit)
-
     }
 
-    private fun animateDigit() {
+    private fun animateDigit(msPerFlip: Long) {
         animateFrom = getLastDigit()
-        startAnimation()
+        startAnimation(msPerFlip)
     }
 
     private fun init() {
@@ -80,21 +84,23 @@ internal class FlipDigitLinear(
         animation2?.setAnimationListener(this)
     }
 
-    private fun startAnimation() {
+    private fun startAnimation(msPerFlip: Long) {
         if (animateTo == animateFrom) {
             onAnimComplete?.onComplete(id)
         } else {
-            startDigitAnimation(true)
-            startDigitAnimation(false)
+            startDigitAnimation(msPerFlip, true)
+            startDigitAnimation(msPerFlip, false)
         }
     }
 
-    private fun startDigitAnimation(isUpper: Boolean) {
+    private fun startDigitAnimation(msPerFlip: Long, isUpper: Boolean) {
         if (isUpper) {
+            animation1?.duration = msPerFlip
             imageFrontUpper?.clearAnimation()
             imageFrontUpper?.animation = animation1
             imageFrontUpper?.startAnimation(animation1)
         } else {
+            animation2?.duration = msPerFlip
             imageFrontLower?.clearAnimation()
             imageFrontLower?.animation = animation2
             imageFrontLower?.startAnimation(animation2)
@@ -134,60 +140,72 @@ internal class FlipDigitLinear(
 
     private fun setDigitImage(digitToShow: Int, isUpper: Boolean, image: ImageView) {
         image.tag = digitToShow
-        var resource = 0
-
-        when (digitToShow) {
-            0 -> resource = if (isUpper)
-                R.drawable.digit_0_upper
-            else
-                R.drawable.digit_0_lower
-
-            1 -> resource = if (isUpper)
-                R.drawable.digit_1_upper
-            else
-                R.drawable.digit_1_lower
-
-            2 -> resource = if (isUpper)
-                R.drawable.digit_2_upper
-            else
-                R.drawable.digit_2_lower
-
-            3 -> resource = if (isUpper)
-                R.drawable.digit_3_upper
-            else
-                R.drawable.digit_3_lower
-
-            4 -> resource = if (isUpper)
-                R.drawable.digit_4_upper
-            else
-                R.drawable.digit_4_lower
-
-            5 -> resource = if (isUpper)
-                R.drawable.digit_5_upper
-            else
-                R.drawable.digit_5_lower
-
-            6 -> resource = if (isUpper)
-                R.drawable.digit_6_upper
-            else
-                R.drawable.digit_6_lower
-
-            7 -> resource = if (isUpper)
-                R.drawable.digit_7_upper
-            else
-                R.drawable.digit_7_lower
-
-            8 -> resource = if (isUpper)
-                R.drawable.digit_8_upper
-            else
-                R.drawable.digit_8_lower
-
-            9 -> resource = if (isUpper)
-                R.drawable.digit_9_upper
-            else
-                R.drawable.digit_9_lower
-        }
+        val resource: Int =
+            try {
+                when (digitToShow) {
+                    0 -> if (isUpper)
+                        numberStyle.resourceList[0]
+                    else
+                        numberStyle.resourceList[1]
+                    1 -> if (isUpper)
+                        numberStyle.resourceList[2]
+                    else
+                        numberStyle.resourceList[3]
+                    2 -> if (isUpper)
+                        numberStyle.resourceList[4]
+                    else
+                        numberStyle.resourceList[5]
+                    3 -> if (isUpper)
+                        numberStyle.resourceList[6]
+                    else
+                        numberStyle.resourceList[7]
+                    4 -> if (isUpper)
+                        numberStyle.resourceList[8]
+                    else
+                        numberStyle.resourceList[9]
+                    5 -> if (isUpper)
+                        numberStyle.resourceList[10]
+                    else
+                        numberStyle.resourceList[11]
+                    6 -> if (isUpper)
+                        numberStyle.resourceList[12]
+                    else
+                        numberStyle.resourceList[13]
+                    7 -> if (isUpper)
+                        numberStyle.resourceList[14]
+                    else
+                        numberStyle.resourceList[15]
+                    8 -> if (isUpper)
+                        numberStyle.resourceList[16]
+                    else
+                        numberStyle.resourceList[17]
+                    9 -> if (isUpper)
+                        numberStyle.resourceList[18]
+                    else
+                        numberStyle.resourceList[19]
+                    else -> R.drawable.resource_missing
+                }
+            } catch (exception: IndexOutOfBoundsException) {
+                exception.printStackTrace()
+                R.drawable.resource_missing
+            } catch (exception: MissingResourceException) {
+                exception.printStackTrace()
+                R.drawable.resource_missing
+            }
         image.setImageResource(resource)
+    }
+
+    override fun onAnimationStart(animation: Animation) {
+        if (animation === animation1) {
+            imageFrontLower?.visibility = View.INVISIBLE
+            imageFrontUpper?.visibility = View.VISIBLE
+
+            imageFrontLower?.let { setDigitImage(digitToShow, false, it) }
+            imageBackUpper?.let { setDigitImage(digitToShow, true, it) }
+
+        } else if (animation === animation2) {
+            imageFrontLower?.visibility = View.VISIBLE
+        }
     }
 
     override fun onAnimationEnd(animation: Animation) {
@@ -199,26 +217,12 @@ internal class FlipDigitLinear(
             imageBackLower?.let { setDigitImage(digitToShow, false, it) }
 
             incrementFromCode()
-            animateDigit()
+            animateDigit(animationSpeed)
         }
     }
 
     override fun onAnimationRepeat(arg0: Animation) {
         //nothing
-    }
-
-    override fun onAnimationStart(animation: Animation) {
-
-        if (animation === animation1) {
-            imageFrontLower?.visibility = View.INVISIBLE
-            imageFrontUpper?.visibility = View.VISIBLE
-
-            imageFrontLower?.let { setDigitImage(digitToShow, false, it) }
-            imageBackUpper?.let { setDigitImage(digitToShow, true, it) }
-
-        } else if (animation === animation2) {
-            imageFrontLower?.visibility = View.VISIBLE
-        }
     }
 
     interface OnAnimationComplete {

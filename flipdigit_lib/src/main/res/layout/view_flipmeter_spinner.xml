@@ -1,38 +1,39 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-                xmlns:tools="http://schemas.android.com/tools"
-                android:layout_width="wrap_content" android:layout_height="wrap_content"
-                android:background="@android:color/white"
-                android:padding="1dip">
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:background="@android:color/white"
+    android:padding="1dp">
 
     <!--Change width and height to customize ViewSize-->
     <ImageView
-            android:id="@+id/FlipMeterSpinner_image_back_upper"
-            android:layout_width="45dip"
-            android:layout_height="33dip"
-            android:src="@drawable/digit_0_upper"
-            tools:src="@drawable/digit_0_upper"/>
+        android:id="@+id/FlipMeterSpinner_image_back_upper"
+        android:layout_width="45dp"
+        android:layout_height="33dp"
+        android:src="@drawable/digit_0_upper"
+        tools:src="@drawable/digit_0_upper" />
 
     <ImageView
-            android:id="@+id/FlipMeterSpinner_image_back_lower"
-            android:layout_width="45dip"
-            android:layout_height="33dip"
-            android:layout_below="@+id/FlipMeterSpinner_image_back_upper"
-            android:src="@drawable/digit_0_lower"
-            tools:src="@drawable/digit_0_lower"/>
+        android:id="@+id/FlipMeterSpinner_image_back_lower"
+        android:layout_width="45dp"
+        android:layout_height="33dp"
+        android:layout_below="@+id/FlipMeterSpinner_image_back_upper"
+        android:src="@drawable/digit_0_lower"
+        tools:src="@drawable/digit_0_lower" />
 
     <ImageView
-            android:id="@+id/FlipMeterSpinner_image_front_upper"
-            android:layout_width="45dip"
-            android:layout_height="33dip"
-            android:src="@drawable/digit_0_upper"
-            tools:src="@drawable/digit_0_upper"/>
+        android:id="@+id/FlipMeterSpinner_image_front_upper"
+        android:layout_width="45dp"
+        android:layout_height="33dp"
+        android:src="@drawable/digit_0_upper"
+        tools:src="@drawable/digit_0_upper" />
 
     <ImageView
-            android:id="@+id/FlipMeterSpinner_image_front_lower"
-            android:layout_width="45dip"
-            android:layout_height="33dip"
-            android:layout_below="@+id/FlipMeterSpinner_image_front_upper"
-            android:src="@drawable/digit_0_lower"
-            tools:src="@drawable/digit_0_lower"/>
+        android:id="@+id/FlipMeterSpinner_image_front_lower"
+        android:layout_width="45dp"
+        android:layout_height="33dp"
+        android:layout_below="@+id/FlipMeterSpinner_image_front_upper"
+        android:src="@drawable/digit_0_lower"
+        tools:src="@drawable/digit_0_lower" />
 </RelativeLayout>

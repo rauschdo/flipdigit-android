@@ -26,7 +26,7 @@ allprojects {
 Step 2: Add the dependency in your app build.gradle
 ```Gradle
 dependencies {
-    implementation 'com.github.rauschdo:flipdigit-android:1.0'
+    implementation 'com.github.rauschdo:flipdigit-android:1.1'
 }
 ```
 
@@ -48,7 +48,7 @@ or
                 android:id="@+id/flipMeterSpinner"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                app:animSpeed="100"
+                app:msPerFlip="100"
                 app:randomFlipping="true"/>
 ```
 
@@ -90,12 +90,18 @@ MainActivity.kt
 
 |attr|format|default|description|
 |---|:---|:---|:---:|
-|animSpeed|integer|250|animation time in milliseconds|
+|msPerFlip\n(animSpeed in 1.0)|integer|250|animation time in milliseconds|
+|flips|integer|5|defines how many number animations to run, last one showing real Value\n**(only relevant if randomFlipping is enabled otherwise ignored)**|
 |randomFlipping|boolean|false|view will display random numbers while flipping before locking to correct position instead of linear counting upwards|
+
+### Possible future Tasks
+* More number variations
+* Possibility to inject own list of prepared assets for numbers
+* Playground screen to dynamically adjust attributes
 
 ## License
 ```
-Copyright 2019 Dominik Rausch
+Copyright 2021 Dominik Rausch
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
